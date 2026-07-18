@@ -1,0 +1,28 @@
+<div class="auth-panel-content">
+  <h2 class="auth-title">Welcome Back</h2>
+  <p class="auth-subtitle">Sign in to manage your digital permits and requests.</p>
+  
+  <div class="auth-error-alert" *ngIf="errorMessage" style="color: #ef4444; background: #fef2f2; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.875rem; border: 1px solid #fee2e2;">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ errorMessage }}
+  </div>
+
+  <form class="auth-form" (submit)="onLoginSubmit($event)">
+    <div class="auth-group">
+      <label>Email Address</label>
+      <input type="email" name="email" [(ngModel)]="email" placeholder="enter your email" required />
+    </div>
+    <div class="auth-group">
+      <label>Password</label>
+      <input type="password" name="password" [(ngModel)]="password" placeholder="enter password" required />
+    </div>
+    <div class="auth-utilities">
+      <label class="chk-box"><input type="checkbox" /> Remember me</label>
+      <a href="#" class="forgot-link" (click)="$event.preventDefault()">Forgot Password?</a>
+    </div>
+    <button type="submit" class="btn-auth-action">Login Account</button>
+  </form>
+
+  <div class="auth-footer">
+    <p>New to the portal? <a (click)="switchToSignUp.emit()" class="switch-auth-link">Create a citizen account</a></p>
+  </div>
+</div>

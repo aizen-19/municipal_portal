@@ -1,0 +1,132 @@
+.footer {
+  background-color: #0b1e36;      
+  color: #ffffff;                 
+  padding: 40px 40px 20px 40px;   
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.footer-top {
+  display: flex;                  
+  justify-content: space-between; 
+  gap: 30px;                      
+  margin-bottom: 30px;            
+  flex-wrap: wrap;               
+}
+
+.footer-col {
+  flex: 1;                        
+  min-width: 180px;               
+}
+
+.brand-col {
+  flex: 1.5;                      
+  display: flex;
+  flex-direction: column;
+  gap: 15px;                      
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;            
+  gap: 12px;                      
+}
+
+.footer-logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;         
+}
+
+.brand-text .main-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.brand-text .sub-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;                 
+  letter-spacing: 0.5px;
+}
+
+.brand-desc {
+  font-size: 13.5px;
+  color: #cbd5e1;                 
+  line-height: 1.6;               
+}
+
+.col-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 20px;            
+}
+
+.col-links {
+  list-style: none;               
+  padding: 0;                     
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;                      
+}
+
+.col-links a {
+  text-decoration: none;          
+  color: #cbd5e1;                 
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.col-links a:hover {
+  color: #38bdf8;                 
+}
+
+.footer-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08); 
+  margin-bottom: 20px;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.copy-text {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.credit-text {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 30px 20px 20px 20px;
+  }
+  .footer-top {
+    flex-direction: column;       
+    gap: 25px;
+  }
+  .footer-bottom {
+    flex-direction: column;       
+    text-align: center;
+    justify-content: center;
+    gap: 10px;
+  }
+}

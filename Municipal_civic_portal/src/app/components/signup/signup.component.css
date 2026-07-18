@@ -1,0 +1,99 @@
+/* =========================================
+   SIGN UP PANEL CONTENT LAYOUT
+   =========================================
+*/
+.auth-panel-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.auth-title {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 6px 0;
+  color: #0b1a30;
+}
+
+.auth-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  margin: 0 0 24px 0;
+  line-height: 1.4;
+}
+
+/* FORM FIELDS STRUCTURE */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.auth-group input {
+  padding: 11px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #0b1a30;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-group input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* PRIMARY ACTION BUTTON */
+.btn-auth-action {
+  background: #007bff;
+  color: #ffffff;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-top: 8px;
+}
+
+.btn-auth-action:hover {
+  background: #0056b3;
+}
+
+/* FOOTER TOGGLE PANEL */
+.auth-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13.5px;
+  color: #475569;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+}
+
+.switch-auth-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.switch-auth-link:hover {
+  text-decoration: underline;
+}

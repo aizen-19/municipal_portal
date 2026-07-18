@@ -1,0 +1,39 @@
+/* =========================================
+  GLOBAL RESET & SMOOTH SCROLL STYLES
+  =========================================
+  Why: Resets default browser margins/paddings and enables smooth gliding 
+  transitions across anchor links globally.
+*/
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+/* FLUSH ACCIDENTAL GAP MARGINS
+   Why: Resets heading margins which often push containers down, 
+   causing those thin white gaps.
+*/
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/* =========================================
+   SPA SMOOTH SCROLL ANCHOR CORRECTIONS
+   =========================================
+*/
+
+#services,
+#procedure,
+#aboutus,
+#contactus {
+  scroll-margin-top: 95px;      /* Fixes the top header cutting under navbar */
+  padding-bottom: 60px;         /* NEW: Adds safety padding at the bottom of the section */
+  box-sizing: border-box;       /* Ensures padding behaves cleanly within the width metrics */
+}
