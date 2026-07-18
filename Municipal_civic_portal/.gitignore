@@ -40,3 +40,14 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Ignore the H2 database files
+backend-java/data/
+
+# Ignore compiled Java build files
+backend-java/target/
+
+# Ignore node modules and IDE files
+**/node_modules/
+.workspace/
+.vscode/

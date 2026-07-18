@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -44,7 +45,7 @@ public class AuthController {
             throw new RuntimeException(ex);
         }
     }
-
+    @RequestMapping("/api/auth")
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Map<String, String> body) {
         String fullName = body.get("fullName");
