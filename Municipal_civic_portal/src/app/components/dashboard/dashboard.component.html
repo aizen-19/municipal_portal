@@ -1,0 +1,871 @@
+<div class="dashboard-wrapper">
+  <!-- Top Navigation Bar Layout -->
+  <header class="dashboard-navbar">
+    <div class="nav-brand-section">
+      <!-- Hamburger Menu Toggle Button (Three Horizontal Lines) -->
+      <button class="hamburger-menu-btn" (click)="toggleMenu()" aria-label="Toggle Navigation Menu">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <div class="brand-logo">
+        <i class="bi bi-building-fill-columns"></i>
+      </div>
+      <div class="brand-text">
+        <h2>Municipal Civic Portal</h2>
+        <span>Citizen Services</span>
+      </div>
+    </div>
+
+    <!-- Floating Dropdown menu overlay, toggled by the hamburger lines -->
+    <div class="hamburger-dropdown-list" *ngIf="showMenu" (click)="$event.stopPropagation()">
+      <a (click)="switchTab('dashboard')" [class.active]="activeTab === 'dashboard'">
+        <i class="bi bi-grid-1x2"></i> Overview
+      </a>
+      <a (click)="switchTab('apply')" [class.active]="activeTab === 'apply'">
+        <i class="bi bi-file-earmark-text"></i> Apply Permit
+      </a>
+      <a (click)="switchTab('my-applications')" [class.active]="activeTab === 'my-applications'">
+        <i class="bi bi-folder-check"></i> Tracker
+      </a>
+      <a (click)="switchTab('property-tax')" [class.active]="activeTab === 'property-tax'">
+        <i class="bi bi-calculator"></i> Property Tax
+      </a>
+      <a (click)="switchTab('complaints')" [class.active]="activeTab === 'complaints'">
+        <i class="bi bi-chat-left-text"></i> Complaints
+      </a>
+      <a (click)="switchTab('profile')" [class.active]="activeTab === 'profile'">
+        <i class="bi bi-person-badge"></i> Profile
+      </a>
+    </div>
+
+    <!-- Right Profile Section -->
+    <div class="nav-profile-section">
+      <div class="user-profile-dropdown">
+        <div class="avatar-icon">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <div class="user-meta-info" style="display: flex; flex-direction: column; align-items: flex-start; margin-right: 10px;">
+          <span class="username" style="font-weight: 600; font-size: 0.85rem;">{{ loggedInUser }}</span>
+          <span class="useremail" style="font-size: 0.7rem; color: #94a3b8;">{{ loggedInEmail }}</span>
+        </div>
+      </div>
+      <button class="nav-logout-btn" (click)="onLogout()">
+        <i class="bi bi-box-arrow-left"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Dashboard Main Layout Workspace -->
+  <div class="dashboard-body-layout">
+    
+    <!-- LEFT SIDEBAR: Persistent AI Chatbot Panel -->
+    <aside class="chatbot-sidebar" [class.collapsed]="isChatbotCollapsed">
+      <!-- Collapsed State: Narrow Toolbar -->
+      <div class="collapsed-chatbot-bar" *ngIf="isChatbotCollapsed" (click)="toggleChatbot()" title="Expand AI Civic Assistant">
+        <div class="collapsed-bot-avatar">
+          <i class="bi bi-robot"></i>
+        </div>
+        <div class="collapsed-expand-hint">
+          <i class="bi bi-chevron-double-right"></i>
+          <span>AI CHAT</span>
+        </div>
+      </div>
+
+      <!-- Expanded State -->
+      <div class="expanded-chatbot-wrapper" *ngIf="!isChatbotCollapsed">
+        <div class="chat-header">
+          <div class="bot-avatar-group">
+            <div class="bot-avatar">
+              <i class="bi bi-robot"></i>
+            </div>
+            <div class="bot-status">
+              <h4>AI Civic Assistant</h4>
+              <p><span></span> Online | Relational DB Guide</p>
+            </div>
+          </div>
+          <button class="btn-collapse-chatbot" (click)="toggleChatbot()" title="Collapse Chatbot">
+            <i class="bi bi-chevron-double-left"></i>
+          </button>
+        </div>
+
+        <!-- Messages Thread -->
+        <div class="chat-messages-container">
+          <div class="chat-message" *ngFor="let msg of chatMessages" [ngClass]="msg.sender">
+            <div class="msg-avatar" *ngIf="msg.sender === 'ai'">
+              <i class="bi bi-robot"></i>
+            </div>
+            <div class="msg-bubble">
+              <p [innerHTML]="msg.text"></p>
+              <small>{{ msg.time }}</small>
+            </div>
+          </div>
+          
+          <!-- Typing Indicator -->
+          <div class="chat-message ai" *ngIf="isChatTyping">
+            <div class="msg-avatar">
+              <i class="bi bi-robot"></i>
+            </div>
+            <div class="msg-bubble typing">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggestions row -->
+        <div class="chat-suggestions">
+          <button (click)="chatInput = 'How do I apply for a building permit?'; sendChatMessage()">
+            Permit info
+          </button>
+          <button (click)="chatInput = 'What are the property tax zones?'; sendChatMessage()">
+            Tax Zones
+          </button>
+          <button (click)="chatInput = 'How do I report a pothole complaint?'; sendChatMessage()">
+            File Complaint
+          </button>
+          <button (click)="chatInput = 'Do I need a Trade License?'; sendChatMessage()">
+            Trade License
+          </button>
+        </div>
+
+        <!-- Input Bar -->
+        <form class="chat-input-bar" (submit)="$event.preventDefault(); sendChatMessage()">
+          <input type="text" name="chatInput" [(ngModel)]="chatInput" placeholder="Ask about zoning, RDS, or taxes..." required />
+          <button type="submit" class="btn-send-message">
+            <i class="bi bi-send-fill"></i>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT: Tab Workspaces -->
+    <main class="workspace-content-pane">
+
+      <!-- TAB 1: OVERVIEW -->
+      <ng-container *ngIf="activeTab === 'dashboard'">
+        <!-- Welcome Banner Section -->
+        <section class="welcome-card">
+          <div class="welcome-card-content">
+            <h3>Welcome back,</h3>
+            <h1>{{ loggedInUser }}</h1>
+            <p class="current-date-badge">
+              <i class="bi bi-calendar3"></i> {{ currentDateString }}
+            </p>
+          </div>
+          <div class="welcome-badge">
+            <i class="bi bi-shield-check"></i> Aadhaar Verified
+          </div>
+        </section>
+
+        <!-- Statistics Grid Panel -->
+        <section class="metrics-grid">
+          <div class="metric-card total">
+            <div class="metric-icon"><i class="bi bi-file-earmark-bar-graph"></i></div>
+            <div class="metric-data">
+              <div class="counter">{{ statTotal }}</div>
+              <div class="label">Total Records</div>
+              <div class="subtext">All time registrations</div>
+            </div>
+          </div>
+
+          <div class="metric-card pending">
+            <div class="metric-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="metric-data">
+              <div class="counter">{{ statPending }}</div>
+              <div class="label">Pending Action</div>
+              <div class="subtext">Under AI/Officer Review</div>
+            </div>
+          </div>
+
+          <div class="metric-card approved">
+            <div class="metric-icon"><i class="bi bi-check-circle"></i></div>
+            <div class="metric-data">
+              <div class="counter">{{ statApproved }}</div>
+              <div class="label">Approved / Completed</div>
+              <div class="subtext">Successfully processed</div>
+            </div>
+          </div>
+
+          <div class="metric-card rejected">
+            <div class="metric-icon"><i class="bi bi-x-circle"></i></div>
+            <div class="metric-data">
+              <div class="counter">{{ statRejected }}</div>
+              <div class="label">Rejected Applications</div>
+              <div class="subtext">Requires correction</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Workspace Overview -->
+        <section class="workspace-card">
+          <div class="overview-split-layout">
+            <!-- Recent Applications -->
+            <div class="recent-list-panel">
+              <div class="panel-header">
+                <h3>Recent Permit Applications</h3>
+                <a (click)="switchTab('my-applications')" class="panel-link">View All</a>
+              </div>
+              <div class="list-container" *ngIf="permits.length > 0; else noPermits">
+                <div class="list-item" *ngFor="let p of permits.slice(0, 3)">
+                  <div class="item-icon-box bg-blue">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                  </div>
+                  <div class="item-details">
+                    <h4>{{ p.type }}</h4>
+                    <p>Applied on: {{ p.date | date:'mediumDate' }} | File: {{ p.docName }}</p>
+                  </div>
+                  <span class="status-badge" [ngClass]="p.status.toLowerCase()">{{ p.status }}</span>
+                </div>
+              </div>
+              <ng-template #noPermits>
+                <div class="empty-state-mini">
+                  <i class="bi bi-journal-x"></i>
+                  <p>No permit records found.</p>
+                </div>
+              </ng-template>
+            </div>
+
+            <!-- Quick Service Grid -->
+            <div class="quick-services-panel">
+              <h3>Quick Services</h3>
+              <div class="quick-grid">
+                <div class="quick-card" (click)="switchTab('apply')">
+                  <i class="bi bi-building"></i>
+                  <span>Building Permit</span>
+                </div>
+                <div class="quick-card" (click)="switchTab('apply')">
+                  <i class="bi bi-shop"></i>
+                  <span>Trade License</span>
+                </div>
+                <div class="quick-card" (click)="switchTab('property-tax')">
+                  <i class="bi bi-wallet2"></i>
+                  <span>Property Tax</span>
+                </div>
+                <div class="quick-card" (click)="switchTab('complaints')">
+                  <i class="bi bi-exclamation-octagon"></i>
+                  <span>File Complaint</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- TAB 2: APPLY PERMIT FORM -->
+      <ng-container *ngIf="activeTab === 'apply'">
+        <section class="section-container">
+          <div class="section-header">
+            <h2>Apply for Municipal Permits & Licenses</h2>
+            <p>Submit digital requests for building constructions or commercial trade licenses. AI scanning will execute instantly upon submission.</p>
+          </div>
+
+          <div class="apply-layout">
+            <!-- Selection Menu -->
+            <div class="permit-selector">
+              <button class="selector-btn" [class.active]="permitType === 'building_permit'" (click)="permitType = 'building_permit'">
+                <i class="bi bi-building-add"></i>
+                <div>
+                  <strong>Building Permit</strong>
+                  <p>Residential & Commercial structure approval</p>
+                </div>
+              </button>
+              <button class="selector-btn" [class.active]="permitType === 'trade_license'" (click)="permitType = 'trade_license'">
+                <i class="bi bi-file-earmark-person"></i>
+                <div>
+                  <strong>Trade License</strong>
+                  <p>Commercial business operating certificate</p>
+                </div>
+              </button>
+            </div>
+
+            <!-- Permit Form Card -->
+            <div class="form-card">
+              <div class="alert-box success" *ngIf="permitSuccess">
+                <i class="bi bi-check-circle-fill"></i> {{ permitSuccess }}
+              </div>
+              <div class="alert-box error" *ngIf="permitError">
+                <i class="bi bi-exclamation-triangle-fill"></i> {{ permitError }}
+              </div>
+
+              <form (submit)="$event.preventDefault(); submitPermit();">
+                <!-- Building Permit fields -->
+                <div *ngIf="permitType === 'building_permit'" class="form-fields">
+                  <h3>Building Permit Details</h3>
+                  
+                  <div class="form-group">
+                    <label>Proposed Construction Description</label>
+                    <textarea name="permitDetails" [(ngModel)]="permitDetails" rows="4" placeholder="Describe the construction project (e.g. Double story residential building, site dimension, structural components...)" required></textarea>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Structural Type</label>
+                      <select name="structType" style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
+                        <option>Residential (Single Family)</option>
+                        <option>Residential (Apartment Block)</option>
+                        <option>Commercial Complex</option>
+                        <option>Industrial Warehouse</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Plot Area (Sq. Yards)</label>
+                      <input type="number" placeholder="e.g. 300" style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label>Attach Blueprint Plan & Property Deed (PDF format)</label>
+                    <div class="file-upload-zone">
+                      <i class="bi bi-cloud-arrow-up-fill upload-icon"></i>
+                      <p *ngIf="!permitDocName">Drag files here or <span>browse files</span> to select</p>
+                      <p *ngIf="permitDocName" style="color: #2563eb; font-weight: 600;">Selected: {{ permitDocName }}</p>
+                      <input type="file" (change)="onFileSelected($event)" accept=".pdf" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Trade License fields -->
+                <div *ngIf="permitType === 'trade_license'" class="form-fields">
+                  <h3>Trade License Registration</h3>
+                  
+                  <div class="form-group">
+                    <label>Business / Shop Establishment Name</label>
+                    <input type="text" name="businessName" placeholder="e.g. Apex Hardware Stores" style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Trade Scope & Commercial Activity</label>
+                    <textarea name="permitDetails" [(ngModel)]="permitDetails" rows="4" placeholder="Detail the business operations (e.g. Retail sale of building hardware and electrical tools...)" required></textarea>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label>Trade Category</label>
+                      <select style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.95rem;">
+                        <option>Retail Store / Shop</option>
+                        <option>Food & Restaurant</option>
+                        <option>Office / Corporate Workspace</option>
+                        <option>Manufacturing Unit</option>
+                        <option>Healthcare Center</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label>Annual Trade License Fee (Fixed)</label>
+                      <input type="text" value="₹5,000 / year" disabled style="padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f1f5f9; color: #64748b; font-weight: 600;" />
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" class="submit-btn" [disabled]="isSubmittingPermit">
+                  <span *ngIf="!isSubmittingPermit"><i class="bi bi-shield-check"></i> Submit Application</span>
+                  <span *ngIf="isSubmittingPermit"><i class="spinner-icon"></i> AI Validation in Progress...</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- TAB 3: APPLICATION TRACKER -->
+      <ng-container *ngIf="activeTab === 'my-applications'">
+        <section class="section-container">
+          <div class="section-header">
+            <h2>Application Tracker</h2>
+            <p>Monitor your active permit submissions, verify AI scan checkmarks, and execute simulated officer reviews.</p>
+          </div>
+
+          <div class="tracker-card">
+            <div class="table-wrapper" *ngIf="permits.length > 0; else noTracker">
+              <table class="tracker-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Service Type</th>
+                    <th>Submission Date</th>
+                    <th>Uploaded Document</th>
+                    <th>Zoning Check (AI)</th>
+                    <th>Status</th>
+                    <th>Simulation Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let p of permits">
+                    <td><code>{{ p.id }}</code></td>
+                    <td><strong>{{ p.type }}</strong></td>
+                    <td>{{ p.date | date:'mediumDate' }}</td>
+                    <td><i class="bi bi-file-earmark-pdf" style="color: #ef4444; margin-right: 5px;"></i> {{ p.docName }}</td>
+                    <td>
+                      <span class="ai-checkmark success">
+                        <i class="bi bi-shield-fill-check"></i> Passed
+                      </span>
+                    </td>
+                    <td>
+                      <span class="status-badge" [ngClass]="p.status.toLowerCase()">{{ p.status }}</span>
+                    </td>
+                    <td>
+                      <div class="btn-group-simulation" *ngIf="p.status === 'Pending'">
+                        <button (click)="simulatePermitStatus(p.id, 'Approved')" class="btn-sim approve">
+                          <i class="bi bi-check-lg"></i> Approve
+                        </button>
+                        <button (click)="simulatePermitStatus(p.id, 'Rejected')" class="btn-sim reject">
+                          <i class="bi bi-x-lg"></i> Reject
+                        </button>
+                      </div>
+                      <span *ngIf="p.status !== 'Pending'" class="sim-completed-label">
+                        <i class="bi bi-lock-fill"></i> Completed
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noTracker>
+              <div class="empty-state">
+                <div class="icon-bubble">
+                  <i class="bi bi-journal-plus"></i>
+                </div>
+                <h4>No Active Permits Found</h4>
+                <p>You haven't submitted any building permits or trade license applications yet. Head over to the "Apply Permit" section to start.</p>
+                <button class="action-start-btn" (click)="switchTab('apply')">
+                  <i class="bi bi-plus-lg"></i> Start New Application
+                </button>
+              </div>
+            </ng-template>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- TAB 4: PROPERTY TAX -->
+      <ng-container *ngIf="activeTab === 'property-tax'">
+        <section class="section-container">
+          <div class="section-header">
+            <h2>Property Tax Center</h2>
+            <p>Compute your local annual property taxes using zone multipliers, complete payments, and download certified receipts.</p>
+          </div>
+
+          <div class="tax-grid">
+            <!-- Column Left: Calculator -->
+            <div class="tax-card calculator">
+              <h3>Property Tax Calculator</h3>
+              <div class="form-group">
+                <label>Location Zone Selection</label>
+                <select name="taxZone" [(ngModel)]="taxZone" (change)="calculateTax()" style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                  <option value="A">Zone A (Premium Core / Main Roads) - ₹15/sq.ft.</option>
+                  <option value="B">Zone B (Mid-City / Suburbs) - ₹10/sq.ft.</option>
+                  <option value="C">Zone C (Rural / City Limits) - ₹5/sq.ft.</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Carpet Area (Sq. Feet)</label>
+                  <input type="number" name="taxArea" [(ngModel)]="taxArea" (input)="calculateTax()" placeholder="e.g. 1500" style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" required />
+                </div>
+                <div class="form-group">
+                  <label>Property Usage Type</label>
+                  <select name="taxPropType" [(ngModel)]="taxPropType" (change)="calculateTax()" style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                    <option value="residential">Residential (1.0x)</option>
+                    <option value="commercial">Commercial (1.5x Multiplier)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="tax-calculation-output" *ngIf="calculatedTax > 0">
+                <div class="breakdown-row">
+                  <span>Base Rate:</span>
+                  <strong>₹{{ taxZone === 'A' ? 15 : taxZone === 'B' ? 10 : 5 }} / sq.ft.</strong>
+                </div>
+                <div class="breakdown-row">
+                  <span>Usage Multiplier:</span>
+                  <strong>{{ taxPropType === 'residential' ? '1.0x' : '1.5x' }}</strong>
+                </div>
+                <hr style="border: 0; border-top: 1px dashed #cbd5e1; margin: 15px 0;" />
+                <div class="total-due-row">
+                  <span>Total Annual Dues:</span>
+                  <h2>₹{{ calculatedTax | number }}</h2>
+                </div>
+              </div>
+              <div class="tax-calculation-placeholder" *ngIf="calculatedTax === 0">
+                <i class="bi bi-wallet-fill"></i>
+                <p>Supply carpet area to compute outstanding dues.</p>
+              </div>
+            </div>
+
+            <!-- Column Right: Checkout & Card -->
+            <div class="tax-card checkout" *ngIf="calculatedTax > 0">
+              <h3>Digital Checkout Secure Gateway</h3>
+              
+              <div class="alert-box success" *ngIf="paymentSuccess">
+                <i class="bi bi-check-circle-fill"></i> {{ paymentSuccess }}
+              </div>
+              <div class="alert-box error" *ngIf="paymentError">
+                <i class="bi bi-exclamation-triangle-fill"></i> {{ paymentError }}
+              </div>
+
+              <!-- CSS Flipping Credit Card -->
+              <div class="payment-card-visual" [class.flipped]="isCardFlipped">
+                <!-- Front Side -->
+                <div class="card-side front">
+                  <div class="card-header-logo">
+                    <span class="chip"></span>
+                    <i class="bi bi-credit-card-2-front card-type-icon"></i>
+                  </div>
+                  <div class="card-num-label">
+                    {{ cardNumber || '•••• •••• •••• ••••' }}
+                  </div>
+                  <div class="card-footer-visual">
+                    <div class="card-holder">
+                      <small>CARDHOLDER</small>
+                      <span>{{ cardName || 'CITIZEN NAME' }}</span>
+                    </div>
+                    <div class="card-expiry-visual">
+                      <small>EXPIRES</small>
+                      <span>{{ cardExpiry || 'MM/YY' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Back Side -->
+                <div class="card-side back">
+                  <div class="card-mag-stripe"></div>
+                  <div class="card-cvc-block">
+                    <small>CVC</small>
+                    <span>{{ cardCvc || '•••' }}</span>
+                  </div>
+                  <div class="card-back-text">MUNICIPAL CIVIC PAYMENT PORTAL</div>
+                </div>
+              </div>
+
+              <form (submit)="payTaxSubmit($event)">
+                <div class="form-group">
+                  <label>Cardholder Full Name</label>
+                  <input type="text" name="cardName" [(ngModel)]="cardName" placeholder="e.g. Ananya Rao" required style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+                </div>
+                
+                <div class="form-group">
+                  <label>Card Number</label>
+                  <input type="text" name="cardNumber" [(ngModel)]="cardNumber" placeholder="4111 2222 3333 4444" maxlength="19" required style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="text" name="cardExpiry" [(ngModel)]="cardExpiry" placeholder="MM/YY" maxlength="5" required style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+                  </div>
+                  <div class="form-group">
+                    <label>CVC Security Code</label>
+                    <input type="text" name="cardCvc" [(ngModel)]="cardCvc" (focus)="isCardFlipped = true" (blur)="isCardFlipped = false" placeholder="123" maxlength="3" required style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+                  </div>
+                </div>
+
+                <button type="submit" class="submit-btn" [disabled]="isProcessingPayment">
+                  <span *ngIf="!isProcessingPayment"><i class="bi bi-lock-fill"></i> Pay Securely ₹{{ calculatedTax | number }}</span>
+                  <span *ngIf="isProcessingPayment"><i class="spinner-icon"></i> Processing Secure Payment...</span>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Payments History Table -->
+          <div class="tracker-card" style="margin-top: 30px;">
+            <h3>Your Property Tax Payment History</h3>
+            <div class="table-wrapper" *ngIf="taxPayments.length > 0; else noTaxes">
+              <table class="tracker-table">
+                <thead>
+                  <tr>
+                    <th>Receipt No</th>
+                    <th>Property Details</th>
+                    <th>Total Amount</th>
+                    <th>Payment Date</th>
+                    <th>Transaction</th>
+                    <th>Print Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let t of taxPayments">
+                    <td><code>{{ t.receiptNo }}</code></td>
+                    <td>Zone {{ t.zone }} | {{ t.area }} sq.ft | {{ t.propertyType }}</td>
+                    <td><strong>₹{{ t.amount | number }}</strong></td>
+                    <td>{{ t.date | date:'mediumDate' }}</td>
+                    <td>
+                      <span class="status-badge approved">SUCCESS</span>
+                    </td>
+                    <td>
+                      <button class="btn-print-receipt" (click)="viewReceiptDetails(t)">
+                        <i class="bi bi-printer-fill"></i> Print Receipt
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noTaxes>
+              <div class="empty-state-mini" style="padding: 30px;">
+                <i class="bi bi-wallet2" style="font-size: 2rem; color: #cbd5e1;"></i>
+                <p>No tax transactions recorded on your profile.</p>
+              </div>
+            </ng-template>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- TAB 5: COMPLAINTS REGISTER -->
+      <ng-container *ngIf="activeTab === 'complaints'">
+        <section class="section-container">
+          <div class="section-header">
+            <h2>Citizens Grievance Redressal</h2>
+            <p>File civic issues (e.g. road maintenance, street lights, sanitation) directly to municipal dispatch and monitor field progress.</p>
+          </div>
+
+          <div class="complaints-layout">
+            <!-- Grievance Form -->
+            <div class="form-card" style="margin-bottom: 30px;">
+              <h3>File a New Grievance</h3>
+              
+              <div class="alert-box success" *ngIf="complaintSuccess">
+                <i class="bi bi-check-circle-fill"></i> {{ complaintSuccess }}
+              </div>
+              <div class="alert-box error" *ngIf="complaintError">
+                <i class="bi bi-exclamation-triangle-fill"></i> {{ complaintError }}
+              </div>
+
+              <form (submit)="$event.preventDefault(); submitComplaint();">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Grievance Category</label>
+                    <select name="complaintCategory" [(ngModel)]="complaintCategory" style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                      <option value="Roads">Roads & Potholes Maintenance</option>
+                      <option value="Electricity">Street Lights & Electricity</option>
+                      <option value="Waste Management">Garbage / Waste Management</option>
+                      <option value="Water">Water Supply & Sewage</option>
+                      <option value="Public Health">Public Sanitation & Health</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Grievance Subject</label>
+                    <input type="text" name="complaintSubject" [(ngModel)]="complaintSubject" placeholder="e.g. Street lights broken in block 3" required style="padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1;" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>Description of Incident / Issue Location</label>
+                  <textarea name="complaintDescription" [(ngModel)]="complaintDescription" rows="4" placeholder="Detail the grievance including location reference..." required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" [disabled]="isSubmittingComplaint">
+                  <span *ngIf="!isSubmittingComplaint"><i class="bi bi-send-fill"></i> Dispatch Grievance Report</span>
+                  <span *ngIf="isSubmittingComplaint"><i class="spinner-icon"></i> Dispatching Report...</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Grievance List -->
+            <div class="tracker-card">
+              <h3>Active Grievance Tracker</h3>
+              <div class="table-wrapper" *ngIf="complaints.length > 0; else noComplaints">
+                <table class="tracker-table">
+                  <thead>
+                    <tr>
+                      <th>Grievance ID</th>
+                      <th>Category</th>
+                      <th>Subject</th>
+                      <th>Filed Date</th>
+                      <th>Status</th>
+                      <th>Simulation Tools</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let c of complaints">
+                      <td><code>{{ c.id }}</code></td>
+                      <td><span style="font-weight: 600; color: #475569;">{{ c.category }}</span></td>
+                      <td>{{ c.subject }}</td>
+                      <td>{{ c.date | date:'mediumDate' }}</td>
+                      <td>
+                        <span class="status-badge" [ngClass]="c.status.toLowerCase().replace(' ', '-')">
+                          {{ c.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="btn-group-simulation" *ngIf="c.status === 'Pending'">
+                          <button (click)="simulateComplaintStatus(c.id, 'In Progress')" class="btn-sim approve" style="background: #fef3c7; color: #d97706; border-color: #fde68a;">
+                            <i class="bi bi-truck"></i> Dispatch
+                          </button>
+                        </div>
+                        <div class="btn-group-simulation" *ngIf="c.status === 'In Progress'">
+                          <button (click)="simulateComplaintStatus(c.id, 'Resolved')" class="btn-sim approve" style="background: #dcfce7; color: #16a34a; border-color: #bbf7d0;">
+                            <i class="bi bi-check-all"></i> Resolve
+                          </button>
+                        </div>
+                        <span *ngIf="c.status === 'Resolved'" class="sim-completed-label">
+                          <i class="bi bi-shield-fill-check"></i> Redressed
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <ng-template #noComplaints>
+                <div class="empty-state-mini" style="padding: 40px;">
+                  <i class="bi bi-chat-left-x" style="font-size: 2.5rem; color: #cbd5e1;"></i>
+                  <p>No grievances filed under your user account.</p>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+      <!-- TAB 6: PROFILE -->
+      <ng-container *ngIf="activeTab === 'profile'">
+        <section class="section-container">
+          <div class="section-header">
+            <h2>My Citizen Profile</h2>
+            <p>Inspect digital identification credentials, registered date, and summary metrics connected to the Aadhaar database.</p>
+          </div>
+
+          <div class="profile-card-layout">
+            <!-- Profile Badge -->
+            <div class="profile-main-card">
+              <div class="profile-card-header">
+                <div class="large-avatar">
+                  <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="profile-meta">
+                  <h2>{{ loggedInUser }}</h2>
+                  <p><i class="bi bi-envelope"></i> {{ loggedInEmail }}</p>
+                  <span class="user-status-pill"><i class="bi bi-shield-fill-check"></i> Primary Account</span>
+                </div>
+              </div>
+
+              <div class="profile-details-grid">
+                <div class="p-detail">
+                  <small>Citizen System ID</small>
+                  <span>CIT-{{ loggedInEmail.split('@')[0].toUpperCase() }}-2026</span>
+                </div>
+                <div class="p-detail">
+                  <small>KYC Status</small>
+                  <span style="color: #10b981; font-weight: 600;"><i class="bi bi-patch-check-fill"></i> Aadhaar Linked</span>
+                </div>
+                <div class="p-detail">
+                  <small>Registration Date</small>
+                  <span>July 18, 2026</span>
+                </div>
+                <div class="p-detail">
+                  <small>Jurisdiction</small>
+                  <span>Municipal Corporation Center, AP</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Statistics -->
+            <div class="profile-stats-card">
+              <h3>Service Activity Ledger</h3>
+              <div class="stat-ledger-row">
+                <div class="ledger-icon"><i class="bi bi-file-earmark-text"></i></div>
+                <div class="ledger-info">
+                  <span>Submitted Permits</span>
+                  <p>{{ permits.length }} applications initiated</p>
+                </div>
+              </div>
+              <div class="stat-ledger-row">
+                <div class="ledger-icon"><i class="bi bi-chat-left-text"></i></div>
+                <div class="ledger-info">
+                  <span>Reported Grievances</span>
+                  <p>{{ complaints.length }} filed reports</p>
+                </div>
+              </div>
+              <div class="stat-ledger-row">
+                <div class="ledger-icon"><i class="bi bi-wallet2"></i></div>
+                <div class="ledger-info">
+                  <span>Paid Taxes</span>
+                  <p>{{ taxPayments.length }} successful transactions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </ng-container>
+
+    </main>
+  </div>
+</div>
+
+<!-- DIGITAL TAX RECEIPT DIALOG (MODAL OVERLAY) -->
+<div class="modal-overlay" *ngIf="showReceipt" (click)="showReceipt = null">
+  <div class="receipt-modal-card" (click)="$event.stopPropagation()">
+    <button class="close-modal-btn" (click)="showReceipt = null">×</button>
+
+    <div class="receipt-print-wrapper" id="printable-receipt">
+      <div class="receipt-header">
+        <i class="bi bi-building-fill-columns" style="font-size: 2.5rem; color: #2563eb;"></i>
+        <h2>MUNICIPAL CORPORATION CORP.</h2>
+        <p>TAX & REVENUE DEPARTMENT | AP GOVERNMENT</p>
+        <span class="official-stamp">PAID</span>
+      </div>
+
+      <div class="receipt-body">
+        <div class="receipt-row-title">PROPERTY TAX OFFICIAL RECEIPT</div>
+        
+        <div class="receipt-detail-grid">
+          <div class="r-item">
+            <small>Receipt Number</small>
+            <strong>{{ showReceipt.receiptNo }}</strong>
+          </div>
+          <div class="r-item">
+            <small>Transaction ID</small>
+            <strong>{{ showReceipt.id }}</strong>
+          </div>
+          <div class="r-item">
+            <small>Billing Date</small>
+            <span>{{ showReceipt.date | date:'mediumDate' }}</span>
+          </div>
+          <div class="r-item">
+            <small>Taxpayer Name</small>
+            <span>{{ showReceipt.cardName }}</span>
+          </div>
+          <div class="r-item">
+            <small>Assessment Zone</small>
+            <span>Zone {{ showReceipt.zone }}</span>
+          </div>
+          <div class="r-item">
+            <small>Property Type</small>
+            <span>{{ showReceipt.propertyType }}</span>
+          </div>
+          <div class="r-item">
+            <small>Assessed Carpet Area</small>
+            <span>{{ showReceipt.area }} sq.ft.</span>
+          </div>
+          <div class="r-item">
+            <small>Payment Channel</small>
+            <span>Secure Digital Gateway</span>
+          </div>
+        </div>
+
+        <div class="receipt-financials">
+          <div class="f-row">
+            <span>Annual Property Cess:</span>
+            <span>₹{{ showReceipt.amount | number }}</span>
+          </div>
+          <div class="f-row">
+            <span>Surcharge & Service Tax:</span>
+            <span>₹0</span>
+          </div>
+          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 10px 0;" />
+          <div class="f-row total">
+            <span>Total Amount Paid:</span>
+            <strong>₹{{ showReceipt.amount | number }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="receipt-footer">
+        <p>This is a computer-generated digitally signed certificate. No physical signature is required.</p>
+        <small>© 2026 Municipal Civic Portal. All rights reserved.</small>
+      </div>
+    </div>
+
+    <button class="btn-action-print" onclick="window.print()">
+      <i class="bi bi-printer-fill"></i> Print Receipt Document
+    </button>
+  </div>
+</div>
