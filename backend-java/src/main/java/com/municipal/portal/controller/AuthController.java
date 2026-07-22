@@ -4,7 +4,6 @@ import com.municipal.portal.config.JwtUtil;
 import com.municipal.portal.model.User;
 import com.municipal.portal.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +21,20 @@ import java.util.UUID;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private static final String MESSAGE = "message";
+    private static final String EMAIL = "email";
+    private static final String FULL_NAME = "fullName";
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+
+    public AuthController(
+            UserRepository userRepository,
+            JwtUtil jwtUtil
+    ) {
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+    }
 
     // Salt password hashing utility to match Node logic
     private String hashPassword(String password) {
@@ -45,23 +53,22 @@ public class AuthController {
             throw new RuntimeException(ex);
         }
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> 2cb3183bbaf3f63dfde72c1e9c7df43694d32c5e
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody Map<String, String> body) {
-        String fullName = body.get("fullName");
-        String email = body.get("email");
+    public ResponseEntity<Map<String, Object>> signup(@RequestBody Map<String, String> body) {
+        String fullName = body.get(FULL_NAME);
+        String email = body.get(EMAIL);
         String password = body.get("password");
 
         if (fullName == null || email == null || password == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "All fields are required."));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(MESSAGE, "All fields are required."));
         }
 
         Optional<User> existing = userRepository.findByEmailIgnoreCase(email);
         if (existing.isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Email is already registered."));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(MESSAGE, "Email is already registered."));
         }
 
         String passwordHash = hashPassword(password);
@@ -71,40 +78,48 @@ public class AuthController {
         userRepository.save(newUser);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
-                "message", "User registered successfully!",
-                "user", Map.of("id", newUser.getId(), "fullName", newUser.getFullName(), "email", newUser.getEmail())
+                MESSAGE, "User registered successfully!",
+                "user", Map.of(
+                        "id", newUser.getId(),
+                        FULL_NAME, newUser.getFullName(),
+                        EMAIL, newUser.getEmail()
+                )
         ));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> body) {
+        String email = body.get(EMAIL);
         String password = body.get("password");
 
         if (email == null || password == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Email and password are required."));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(MESSAGE, "Email and password are required."));
         }
 
         Optional<User> userOpt = userRepository.findByEmailIgnoreCase(email);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid email or password."));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(MESSAGE, "Invalid email or password."));
         }
 
         User user = userOpt.get();
         String passwordHash = hashPassword(password);
+
         if (!user.getPasswordHash().equals(passwordHash)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid email or password."));
-        }i
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(MESSAGE, "Invalid email or password."));
+        }
 
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getFullName());
 
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Login successful!");
+        response.put(MESSAGE, "Login successful!");
         response.put("token", token);
         response.put("user", Map.of(
                 "id", user.getId(),
-                "fullName", user.getFullName(),
-                "email", user.getEmail(),
+                FULL_NAME, user.getFullName(),
+                EMAIL, user.getEmail(),
                 "registeredAt", user.getRegisteredAt()
         ));
 
@@ -112,22 +127,27 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> me(HttpServletRequest request) {
         String email = (String) request.getAttribute("userEmail");
+
         if (email == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Unauthenticated."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of(MESSAGE, "Unauthenticated."));
         }
 
         Optional<User> userOpt = userRepository.findByEmailIgnoreCase(email);
+
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found."));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(MESSAGE, "User not found."));
         }
 
         User user = userOpt.get();
+
         return ResponseEntity.ok(Map.of(
                 "id", user.getId(),
-                "fullName", user.getFullName(),
-                "email", user.getEmail(),
+                FULL_NAME, user.getFullName(),
+                EMAIL, user.getEmail(),
                 "registeredAt", user.getRegisteredAt()
         ));
     }
