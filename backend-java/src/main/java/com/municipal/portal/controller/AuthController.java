@@ -45,7 +45,10 @@ public class AuthController {
             throw new RuntimeException(ex);
         }
     }
-    @RequestMapping("/api/auth")
+<<<<<<< HEAD
+
+=======
+>>>>>>> 2cb3183bbaf3f63dfde72c1e9c7df43694d32c5e
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Map<String, String> body) {
         String fullName = body.get("fullName");
@@ -91,7 +94,7 @@ public class AuthController {
         String passwordHash = hashPassword(password);
         if (!user.getPasswordHash().equals(passwordHash)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid email or password."));
-        }
+        }i
 
         String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getFullName());
 
