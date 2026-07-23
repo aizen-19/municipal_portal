@@ -21,14 +21,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:4200")
-                .allowedMethods(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "DELETE",
-                        "OPTIONS"
-                )
+                .allowedOriginPatterns("*") // Allows any local origin/port
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
@@ -43,14 +37,15 @@ public class WebConfig implements WebMvcConfigurer {
                                      HttpServletResponse response,
                                      Object handler) throws Exception {
 
-                // Allow CORS preflight requests
+                // 1. Return HTTP 200 OK directly for CORS preflight OPTIONS requests
                 if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+                    response.setStatus(HttpServletResponse.SC_OK);
                     return true;
                 }
 
                 String path = request.getRequestURI();
 
-                // Public endpoints
+                // 2. Public endpoints
                 if (path.equals("/api/auth/signup")
                         || path.equals("/api/auth/login")
                         || path.equals("/api/ai/chat")
@@ -58,7 +53,7 @@ public class WebConfig implements WebMvcConfigurer {
                     return true;
                 }
 
-                // Protected endpoints
+                // 3. Protected endpoints
                 if (path.startsWith("/api/")) {
 
                     String authHeader = request.getHeader("Authorization");

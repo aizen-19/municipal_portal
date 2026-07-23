@@ -108,15 +108,6 @@
   flex-grow: 1;                  /* Pushes the links down so they line up evenly at the bottom */
 }
 
-.card-action-link {
-  color: #0066ff;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14.5px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
 .card-action-link:hover {
   color: #0044cc;
   text-decoration: underline;

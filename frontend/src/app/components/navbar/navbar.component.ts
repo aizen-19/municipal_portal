@@ -12,9 +12,28 @@ export class NavbarComponent implements OnInit {
   // Tracks the active section string ('home', 'services', 'procedure', etc.)
   currentFragment: string = 'home'; 
 
+  // Direct URLs for Web Portal & Mobile App
+  readonly webUrl: string = 'https://your-web-portal-domain.com';
+  readonly appStoreUrl: string = 'https://play.google.com/store/apps/details?id=com.your.municipal.app';
+
   constructor() { }
 
   ngOnInit(): void { }
+
+  // Detects whether the user is browsing on a Mobile Device
+  isMobileDevice(): boolean {
+    const userAgent = navigator.userAgent || navigator.vendor;
+    return /android|iphone|ipad|ipod|windows phone/i.test(userAgent);
+  }
+
+  // Redirects based on device type
+  getStarted(): void {
+    if (this.isMobileDevice()) {
+      window.location.href = this.appStoreUrl;
+    } else {
+      window.location.href = this.webUrl;
+    }
+  }
 
   // Manual override when a user clicks a navbar item directly
   setActiveSection(section: string): void {

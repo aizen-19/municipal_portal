@@ -1,6 +1,6 @@
 <header class="navbar-header">
-  <div class="brand-logo">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7pksrpsw50Hr7sADccleEH0qtFZV5IjIP3pr7hC01OA&s=10" alt="Municipal Logo" class="logo-img" />
+  <div class="brand-logo" (click)="setActiveSection('home')">
+    <img src="assets/img3.jpeg" alt="Municipal Logo" class="logo-img" />
     <div class="brand-text">
       <strong>Municipal Civic Portal</strong>
       <small>GOVERNMENT OF INDIA</small>
@@ -8,35 +8,41 @@
   </div>
 
   <nav class="nav-links">
-  <!-- Home lights up when currentFragment is null or empty -->
-  <a routerLink="/home" 
-     [class.active]="!currentFragment" 
-     class="nav-item">Home</a>
+    <a [routerLink]="['/']" 
+       fragment="home"
+       (click)="setActiveSection('home')"
+       [class.active]="!currentFragment || currentFragment === 'home'" 
+       class="nav-item">Home</a>
 
-  <a [routerLink]="['/services']" 
-     fragment="services" 
-     [class.active]="currentFragment === 'services'" 
-     class="nav-item">Services</a>
+    <a [routerLink]="['/']" 
+       fragment="services" 
+       (click)="setActiveSection('services')"
+       [class.active]="currentFragment === 'services'" 
+       class="nav-item">Services</a>
 
-  <a [routerLink]="['/Procedure ']" 
-     fragment="procedure" 
-     [class.active]="currentFragment === 'procedure'" 
-     class="nav-item">Procedure</a>
+    <a [routerLink]="['/']" 
+       fragment="procedure" 
+       (click)="setActiveSection('procedure')"
+       [class.active]="currentFragment === 'procedure'" 
+       class="nav-item">Procedure</a>
 
-  <a [routerLink]="['/home']" 
-     fragment="aboutus" 
-     [class.active]="currentFragment === 'aboutus'" 
-     class="nav-item">About Us</a>
+    <a [routerLink]="['/']" 
+       fragment="aboutus" 
+       (click)="setActiveSection('aboutus')"
+       [class.active]="currentFragment === 'aboutus'" 
+       class="nav-item">About Us</a>
 
-  <a [routerLink]="['/home']" 
-     fragment="contactus" 
-     [class.active]="currentFragment === 'contactus'" 
-     class="nav-item">Contact Us</a>
-</nav>
+    <a [routerLink]="['/']" 
+       fragment="contactus" 
+       (click)="setActiveSection('contactus')"
+       [class.active]="currentFragment === 'contactus'" 
+       class="nav-item">Contact Us</a>
+  </nav>
 
   <div class="nav-auth-actions">
     <button class="btn-login" *ngIf="!isUserLoggedIn()" (click)="openModal('login')">Login</button>
     <button class="btn-signup" *ngIf="!isUserLoggedIn()" (click)="openModal('signup')">Sign Up</button>
+    
     <a routerLink="/dashboard" class="btn-dashboard-go" *ngIf="isUserLoggedIn()" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 0.875rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);">
       <i class="bi bi-layout-text-window-reverse" style="margin-right: 8px;"></i> Dashboard
     </a>
