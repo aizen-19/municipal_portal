@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @CrossOrigin(
-    origins = "http://localhost:4200", 
+    origins = "*", 
     allowedHeaders = "*", 
     methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
 )
