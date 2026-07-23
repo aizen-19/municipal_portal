@@ -1,0 +1,17 @@
+# Step 1: Use an official OpenJDK runtime image
+FROM eclipse-temurin:17-jdk-alpine
+
+# Step 2: Set the working directory inside the container
+WORKDIR /app
+
+# Step 3: Copy all project files into the container
+COPY . .
+
+# Step 4: Build the application JAR bypassing tests
+RUN ./mvnw clean package -DskipTests || mvn clean package -DskipTests
+
+# Step 5: Expose port 8080 for Spring Boot
+EXPOSE 8080
+
+# Step 6: Command to run the application
+CMD ["java", "-jar", "target/portal-1.0.0.jar"]
