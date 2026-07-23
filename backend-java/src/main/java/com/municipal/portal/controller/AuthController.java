@@ -17,8 +17,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @CrossOrigin(
-    origins = "*", 
-    allowedHeaders = "*", 
+    origins = { 
+        "http://localhost:4200", 
+        "https://municipal-portal-ssny.vercel.app" // <-- Add your exact Vercel URL here!
+    },
+    allowedHeaders = "*",
     methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
 )
 @RestController
